@@ -26,9 +26,13 @@ export abstract class InterpolatorBase {
         this.nY = this._y.length / this.nX;
     }
 
-    protected search(target: number) {
-        this._i = interpolateSearch(target, this._x, this._i);
-        return this._i;
+    protected search(target: number, allowRight: boolean) {
+        const i = interpolateSearch(target, this._x, this._i);
+        if (i < 0 || (!allowRight && i == this.nX)) { // off the lhs only
+            throw Error("Interpolation failed as 'x' is out of range");
+        }
+        this._i = i;
+        return i;
     }
 
     /** Evaluate the interpolation function
@@ -43,10 +47,7 @@ export abstract class InterpolatorBase {
  */
 export class InterpolatorConstant extends InterpolatorBase {
     public eval(x: number) {
-        let i = Math.max(this.search(x), this.nX - 1);
-        if (i < 0) { // off the lhs only
-            throw Error(`Interpolation failed as ${x} is out of range`);
-        }
+        let i = Math.max(this.search(x, true), this.nX - 1);
 
         // NOTE: In the R function 'approx' there is an argument 'f' that
         // deals with the 'ties' case more gracefully.  This is like the
@@ -58,7 +59,7 @@ export class InterpolatorConstant extends InterpolatorBase {
         const y = Array(this.nY);
         for (let j = 0; j < this.nY; ++j) {
             const k = i + j * this.nX;
-            y[i] = this._y[k];
+            y[j] = this._y[k];
         }
 
         return y;
@@ -70,10 +71,7 @@ export class InterpolatorConstant extends InterpolatorBase {
  */
 export class InterpolatorLinear extends InterpolatorBase {
     public eval(x: number) {
-        const i = this.search(x);
-        if (i < 0 || i == this.nX) { // off the lhs or rhs
-            throw Error(`Interpolation failed as ${x} is out of range`);
-        }
+        const i = this.search(x, false);
 
         const x0 = this._x[i];
         const x1 = this._x[i + 1];
@@ -109,10 +107,7 @@ export class InterpolatorSpline extends InterpolatorBase {
     }
 
     public eval(x: number) {
-        var i = this.search(x);
-        if (i < 0 || i == this.nX) { // off the lhs or rhs
-            throw Error(`Interpolation failed as ${x} is out of range`);
-        }
+        var i = this.search(x, false);
         const y = Array(this.nY);
         for (let j = 0; j < this.nY; ++j) {
             y[j] = splineEval(i, x, this._x, this._yMat[j], this._k[j]);
@@ -129,13 +124,6 @@ export function interpolateSearch(target: number, x: number[], prev: number) {
 
     if (x[i0] <= target) { // advance up until we hit the top
         if (i0 >= n - 1) { // guess is already *at* the top.
-            // This exit is left in here to avoid the possibility of an
-            // infinite loop or reading out of range, but should not be
-            // necessary unless the object has been tampered with because we
-            // always set the guess to the lower bound of our guess for 'i'.
-            // This bit of code is derived from something in `ring`, where
-            // this was dynamic, but it makes for a fairly cheap safety
-            // check.
             return n;
         }
         i1 = i0 + inc;
