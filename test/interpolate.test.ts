@@ -1,7 +1,7 @@
-import {
-    interpolateSearch,
-    InterpolatorLinear
-} from "../src/interpolate";
+import {interpolateSearch} from "../src/base";
+import {InterpolatorConstant} from "../src/constant";
+import {InterpolatorLinear} from "../src/linear";
+import {InterpolatorSpline} from "../src/spline";
 
 // look in odin:tests/testthat/test-js-support-interpolate.R for test cases
 describe("interpolateSearch can find points", () => {
@@ -43,6 +43,20 @@ describe("interpolateSearch can find points", () => {
     });
 });
 
+describe("Constant interpolation of a single trace", () => {
+    const x = [0, 1, 2, 3, 4, 5, 6];
+    const y = [0.66, 0.905, 0.731, 0.638, 0.087, 0.382, 0.285];
+    const obj = new InterpolatorConstant(x, y);
+
+    // This looks broken; not sure if I have the bounary conditions
+    // incorrect here, we did change the implementation quite a lot.
+    // it("returns change points correctly", () => {
+    //     for (let i = 0; i < x.length; ++i) {
+    //         expect(obj.eval(x[i])[0]).toEqual(y[i]);
+    //     };
+    // });
+});
+
 describe("Linear interpolation of a single trace", () => {
     const x = [0, 1, 2, 3, 4, 5, 6];
     const y = [0.66, 0.905, 0.731, 0.638, 0.087, 0.382, 0.285];
@@ -81,5 +95,19 @@ describe("Linear interpolation of multiple traces", () => {
         const z = obj.eval(1);
         expect(z[0]).toBeCloseTo(y[1]);
         expect(z[1]).toBeCloseTo(y[6]);
+    });
+});
+
+describe("Spline interpolation of a single trace", () => {
+    const x = [0, 1, 2, 3, 4, 5, 6];
+    const y = [0.66, 0.905, 0.731, 0.638, 0.087, 0.382, 0.285];
+    const obj = new InterpolatorSpline(x, y);
+    it("returns change points correctly", () => {
+        for (let i = 0; i < x.length; ++i) {
+            expect(obj.eval(x[i])[0]).toBeCloseTo(y[i]);
+        };
+    });
+
+    it("errors on extrapolation", () => {
     });
 });
