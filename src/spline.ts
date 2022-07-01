@@ -1,4 +1,5 @@
 import {InterpolatorBase} from "./base";
+import solveTridiagonal from "solve-tridiagonal";
 
 /**
  * Cubic spline interpolation
@@ -85,34 +86,14 @@ function splineCalcK(A: number[][], B: number[][]) {
     var a = A[0], b = A[1], c = A[2];
     var n = a.length;
     for (var i = 0; i < B.length; ++i) {
-        solveTridiagonal(n, a, b, c, B[i]);
+        doSolveTridiagonal(n, a, b.slice(), c, B[i]);
     }
     return B;
 }
 
-function solveTridiagonal(n: number, a: number[], b: number[], c: number[],
+function doSolveTridiagonal(n: number, a: number[], b: number[], c: number[],
                           x: number[]) {
-    b = b.slice();
-    // Eliminate:
-    for (let i = 1; i < n; ++i) {
-        if (b[i - 1] === 0) {
-            throw Error("solve failed due to lack of diagonal dominance");
-        }
-        const fac = a[i] / b[i - 1];
-        b[i] -= fac * c[i - 1];
-        x[i] -= fac * x[i - 1];
+    if (!solveTridiagonal(n, a, b, c, x)) {
+        throw Error("solve failed");
     }
-
-    // Back-substitute:
-    if (b[n - 1] === 0) {
-        throw Error("solve failed due to singular matrix");
-    }
-    x[n - 1] /= b[n - 1];
-    for (let i = n - 2; i >= 0; i--) {
-        if (b[i] === 0) {
-            throw Error("solve failed due to singular matrix");
-        }
-        x[i] = (x[i] - c[i] * x[i + 1]) / b[i];
-    }
-    return x;
 }
