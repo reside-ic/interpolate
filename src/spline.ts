@@ -88,13 +88,13 @@ function splineCalcK(A: number[][], B: number[][]) {
     const c = A[2];
     const n = a.length;
     for (const x of B) {
-        doSolveTridiagonal(n, a, b.slice(), c, x);
+        solve(n, a, b.slice(), c, x);
     }
     return B;
 }
 
-function doSolveTridiagonal(n: number, a: number[], b: number[], c: number[],
-                            x: number[]) {
+function solve(n: number, a: number[], b: number[], c: number[],
+               x: number[]) {
     if (!solveTridiagonal(n, a, b, c, x)) {
         throw Error("solve failed");
     }
