@@ -1,12 +1,13 @@
 /** Base class for interpolators */
 export abstract class InterpolatorBase {
+    /** Number of 'x' points in the system */
+    public readonly nX: number;
+    /** Number of series per 'x' */
+    public readonly nY: number;
+
     protected _i: number;
     protected _x: number[];
     protected _y: number[];
-    /** Number of 'x' points in the system */
-    readonly nX: number;
-    /** Number of series per 'x' */
-    readonly nY: number;
 
     /**
      * @param x The x (often time) variables that form the domain of
@@ -26,20 +27,20 @@ export abstract class InterpolatorBase {
         this.nY = this._y.length / this.nX;
     }
 
-    protected search(target: number, allowRight: boolean) {
-        const i = interpolateSearch(target, this._x, this._i);
-        if (i < 0 || (!allowRight && i == this.nX)) { // off the lhs only
-            throw Error("Interpolation failed as 'x' is out of range");
-        }
-        this._i = i;
-        return i;
-    }
-
     /** Evaluate the interpolation function
      *
      * @param x The x position to interpolate the function at
      */
     public abstract eval(x: number): number[];
+
+    protected search(target: number, allowRight: boolean) {
+        const i = interpolateSearch(target, this._x, this._i);
+        if (i < 0 || (!allowRight && i === this.nX)) { // off the lhs only
+            throw Error("Interpolation failed as 'x' is out of range");
+        }
+        this._i = i;
+        return i;
+    }
 }
 
 export function interpolateSearch(target: number, x: number[], prev: number) {
@@ -66,7 +67,7 @@ export function interpolateSearch(target: number, x: number[], prev: number) {
             }
         }
     } else { // advance down
-        if (i0 == 0) { // guess is already at the bottom
+        if (i0 === 0) { // guess is already at the bottom
             return -1;
         }
         i0 = i0 - inc;

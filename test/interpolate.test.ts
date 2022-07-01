@@ -64,14 +64,14 @@ describe("Linear interpolation of a single trace", () => {
     it("returns change points correctly", () => {
         for (let i = 0; i < x.length; ++i) {
             expect(obj.eval(x[i])[0]).toBeCloseTo(y[i]);
-        };
+        }
     });
 
     it("returns midpoints correctly", () => {
         for (let i = 0; i < x.length - 1; ++i) {
             expect(obj.eval(x[i] + 0.5)[0]).toBeCloseTo(
                 (y[i] + y[i + 1]) / 2);
-        };
+        }
     });
 
     it ("errors on extrapolation", () => {
@@ -105,9 +105,6 @@ describe("Spline interpolation of a single trace", () => {
     it("returns change points correctly", () => {
         for (let i = 0; i < x.length; ++i) {
             expect(obj.eval(x[i])[0]).toBeCloseTo(y[i]);
-        };
-    });
-
-    it("errors on extrapolation", () => {
+        }
     });
 });

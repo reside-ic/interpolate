@@ -1,5 +1,6 @@
-import {InterpolatorBase} from "./base";
 import solveTridiagonal from "solve-tridiagonal";
+
+import {InterpolatorBase} from "./base";
 
 /**
  * Cubic spline interpolation
@@ -11,7 +12,7 @@ export class InterpolatorSpline extends InterpolatorBase {
         super(x, y);
         this._yMat = [];
         const nX = this.nX;
-        for (var i = 0; i < this.nY; ++i) {
+        for (let i = 0; i < this.nY; ++i) {
             this._yMat.push(y.slice(i * nX, (i + 1) * nX));
         }
         const A = splineCalcA(this._x);
@@ -20,7 +21,7 @@ export class InterpolatorSpline extends InterpolatorBase {
     }
 
     public eval(x: number) {
-        var i = this.search(x, false);
+        const i = this.search(x, false);
         const y = Array(this.nY);
         for (let j = 0; j < this.nY; ++j) {
             y[j] = splineEval(i, x, this._x, this._yMat[j], this._k[j]);
@@ -28,7 +29,6 @@ export class InterpolatorSpline extends InterpolatorBase {
         return y;
     }
 }
-
 
 function splineEval(i: number, x: number, xs: number[], ys: number[],
                     ks: number[]) {
@@ -54,8 +54,8 @@ function splineCalcA(x: number[]) {
         A1[i] = 2 * (1 / (x[i] - x[i - 1]) + 1 / (x[i + 1] - x[i]));
         A2[i] = 1 / (x[i + 1] - x[i]);
     }
-    A0[nm1] = 1 / (x[nm1] - x[nm1-1]);
-    A1[nm1] = 2 / (x[nm1] - x[nm1-1]);
+    A0[nm1] = 1 / (x[nm1] - x[nm1 - 1]);
+    A1[nm1] = 2 / (x[nm1] - x[nm1 - 1]);
     A2[nm1] = 0; // will be ignored
 
     return [A0, A1, A2];
@@ -67,32 +67,34 @@ function splineCalcB(x: number[], y: number[][]) {
     const nm1 = n - 1;
     const B = [];
     for (let j = 0; j < ny; ++j) {
-        const Bj = Array(n);
+        const bj = Array(n);
         const yj = y[j];
-        Bj[0] = 3 * (yj[1] - yj[0]) / ((x[1] - x[0]) * (x[1] - x[0]));
+        bj[0] = 3 * (yj[1] - yj[0]) / ((x[1] - x[0]) * (x[1] - x[0]));
         for (let i = 1; i < nm1; ++i) {
-            Bj[i] = 3 *
-                ((yj[i]   - yj[i-1]) / ((x[i  ] - x[i-1]) * (x[i  ] - x[i-1])) +
-                 (yj[i+1] - yj[i  ]) / ((x[i+1] - x[i  ]) * (x[i+1] - x[i  ])));
+            bj[i] = 3 *
+                ((yj[i]     - yj[i - 1]) / ((x[i    ] - x[i - 1]) * (x[i    ] - x[i - 1])) +
+                 (yj[i + 1] - yj[i    ]) / ((x[i + 1] - x[i    ]) * (x[i + 1] - x[i    ])));
         }
-        Bj[nm1] = 3 *
-            (yj[nm1] - yj[nm1-1]) / ((x[nm1] - x[nm1-1]) * (x[nm1] - x[nm1-1]));
-        B.push(Bj);
+        bj[nm1] = 3 *
+            (yj[nm1] - yj[nm1 - 1]) / ((x[nm1] - x[nm1 - 1]) * (x[nm1] - x[nm1 - 1]));
+        B.push(bj);
     }
     return B;
 }
 
 function splineCalcK(A: number[][], B: number[][]) {
-    var a = A[0], b = A[1], c = A[2];
-    var n = a.length;
-    for (var i = 0; i < B.length; ++i) {
-        doSolveTridiagonal(n, a, b.slice(), c, B[i]);
+    const a = A[0];
+    const b = A[1];
+    const c = A[2];
+    const n = a.length;
+    for (const x of B) {
+        doSolveTridiagonal(n, a, b.slice(), c, x);
     }
     return B;
 }
 
 function doSolveTridiagonal(n: number, a: number[], b: number[], c: number[],
-                          x: number[]) {
+                            x: number[]) {
     if (!solveTridiagonal(n, a, b, c, x)) {
         throw Error("solve failed");
     }
