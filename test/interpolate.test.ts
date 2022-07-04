@@ -1,7 +1,7 @@
 import {interpolateSearch} from "../src/base";
 import {InterpolatorConstant} from "../src/constant";
 import {InterpolatorLinear} from "../src/linear";
-import {InterpolatorSpline} from "../src/spline";
+import {solve, InterpolatorSpline} from "../src/spline";
 
 // look in odin:tests/testthat/test-js-support-interpolate.R for test cases
 describe("interpolateSearch can find points", () => {
@@ -115,30 +115,61 @@ describe("Linear interpolation of a single trace", () => {
     });
 });
 
-// describe("Linear interpolation of multiple traces", () => {
-//     const x = [0, 1, 2, 3, 4];
-//     const y = [[0.38, 0.93, 0.73, 0.93, 0.82],
-//                [0.13, 0.15, 0.16, 0.94, 0.47]];
-//     it("requires correct length inputs", () => {
-//         expect(() => new InterpolatorLinear(x, y.slice(1))).toThrow(
-//             "'y.length' must be multiple of 'x.length'");
-//     });
-
-//     it("returns a vector of length 2", () => {
-//         const obj = new InterpolatorLinear(x, y);
-//         const z = obj.eval(1);
-//         expect(z[0]).toBeCloseTo(y[1]);
-//         expect(z[1]).toBeCloseTo(y[6]);
-//     });
-// });
-
+/* r code for the example
+  x <- 0:6
+  y <- c(0.66, 0.905, 0.731, 0.638, 0.087, 0.382, 0.285)
+  z <- c(0.04, 1.57, 2.06, 2.87, 3.75, 4.55, 5.56)
+  dput(spline(x, y, xout = z, method = "natural")$y)
+*/
 describe("Spline interpolation of a single trace", () => {
     const x = [0, 1, 2, 3, 4, 5, 6];
     const y = [0.66, 0.905, 0.731, 0.638, 0.087, 0.382, 0.285];
+    const z = [0.04, 1.57, 2.06, 2.87, 3.75, 4.55, 5.56];
+    const expected = [0.6750609536, 0.810456584980769, 0.726703650984615,
+                      0.68261705105, 0.174318449519231, 0.205288526442308,
+                      0.389962490092308];
     const obj = new InterpolatorSpline(x, [y]);
     it("returns change points correctly", () => {
         for (let i = 0; i < x.length; ++i) {
             expect(obj.eval(x[i])).toBeCloseTo(y[i]);
         }
+    });
+
+    it("returns other points correctly", () => {
+        for (let i = 0; i < z.length; ++i) {
+            expect(obj.eval(z[i])).toBeCloseTo(expected[i]);
+        }
+    });
+});
+
+
+describe("Linear interpolation of multiple traces", () => {
+    const x = [0, 1, 2, 3, 4];
+    const y = [[0.38, 0.93, 0.73, 0.93, 0.82],
+               [0.13, 0.15, 0.16, 0.94, 0.47]];
+
+    it("returns a vector of length 2", () => {
+        const obj = new InterpolatorLinear(x, y);
+        const z = obj.evalAll(1);
+        console.log(z);
+        expect(z[0]).toBeCloseTo(y[0][1]);
+        expect(z[1]).toBeCloseTo(y[1][1]);
+    });
+});
+
+
+describe("throw on singular matrix", () => {
+    it("throws", () => {
+        // Example from the solve-tridiagonal case, showing we convert
+        // the failure to an error.
+        //     [1 1 0]
+        // A = [2 4 3]
+        //     [0 2 3]
+        var a = [0, 2, 2]
+        var b = [1, 4, 3]
+        var c = [1, 3, 0]
+        var d = [5, 6, 7]
+        expect(() => solve(3, a, b, c, d))
+            .toThrow("solve failed: singular matrix?");
     });
 });

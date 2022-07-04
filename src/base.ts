@@ -25,7 +25,7 @@ export abstract class InterpolatorBase {
         this._x = x;
         this._y = y;
         this.nX = this._x.length;
-        this.nY = this._y[0].length;
+        this.nY = this._y.length;
     }
 
     /** Evaluate the interpolation function
