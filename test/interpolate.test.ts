@@ -42,18 +42,37 @@ describe("interpolateSearch can find points", () => {
     });
 });
 
+/* r code for the example
+  x <- 0:6
+  y <- c(0.66, 0.905, 0.731, 0.638, 0.087, 0.382, 0.285)
+  z <- c(0.04, 1.57, 2.06, 2.87, 3.75, 4.55, 5.56)
+  dput(approx(x, y, z, "constant")$y)
+
+*/
 describe("Constant interpolation of a single trace", () => {
     const x = [0, 1, 2, 3, 4, 5, 6];
     const y = [0.66, 0.905, 0.731, 0.638, 0.087, 0.382, 0.285];
+    const z = [0.04, 1.57, 2.06, 2.87, 3.75, 4.55, 5.56];
+    const expected = [0.66, 0.905, 0.731, 0.731, 0.638, 0.087, 0.382];
     const obj = new InterpolatorConstant(x, [y]);
 
-    // This looks broken; not sure if I have the bounary conditions
-    // incorrect here, we did change the implementation quite a lot.
-    // it("returns change points correctly", () => {
-    //     for (let i = 0; i < x.length; ++i) {
-    //         expect(obj.eval(x[i])[0]).toEqual(y[i]);
-    //     };
-    // });
+    it("returns change points correctly", () => {
+        for (let i = 0; i < x.length; ++i) {
+            expect(obj.eval(x[i])).toEqual(y[i]);
+        };
+    });
+
+    it("returns midpoints correctly", () => {
+        for (let i = 0; i < x.length - 1; ++i) {
+            expect(obj.eval(x[i] + 0.5)).toBeCloseTo(y[i]);
+        }
+    });
+
+    it("returns other points correctly", () => {
+        for (let i = 0; i < z.length; ++i) {
+            expect(obj.eval(z[i])).toBeCloseTo(expected[i]);
+        }
+    });
 });
 
 /* r code for the example:
