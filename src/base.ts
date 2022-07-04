@@ -34,6 +34,17 @@ export abstract class InterpolatorBase {
      */
     public abstract eval(x: number, series: number): number;
 
+    /** Evaluate the interpolation function on all traces
+     * @param x The x position to interpolate the function at
+     */
+    public evalAll(x: number): number[] {
+        const y = Array(this.nY);
+        for (let i = 0; i < this.nY; ++i) {
+            y[i] = this.eval(x, i);
+        }
+        return y;
+    }
+
     protected search(target: number, allowRight: boolean) {
         const i = interpolateSearch(target, this._x, this._i);
         if (i < 0 || (!allowRight && i === this.nX)) { // off the lhs only
