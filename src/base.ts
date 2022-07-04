@@ -18,14 +18,16 @@ export abstract class InterpolatorBase {
      */
     constructor(x: number[], y: number[][]) {
         // TODO: cope with y as number[]
-        //
-        // TODO: clone deeply?, or provide recalculate method to work
-        // with splines
         this._i = 0;
         this._x = x;
         this._y = y;
         this.nX = this._x.length;
         this.nY = this._y.length;
+        for (let i = 0; i < this.nY; ++i) {
+            if (y[i].length !== this.nX) {
+                throw Error(`Invalid length for 'y', expected ${this.nX}`);
+            }
+        }
     }
 
     /** Evaluate the interpolation function

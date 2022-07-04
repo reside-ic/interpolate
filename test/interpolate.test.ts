@@ -173,3 +173,14 @@ describe("throw on singular matrix", () => {
             .toThrow("solve failed: singular matrix?");
     });
 });
+
+describe("validate input y", () => {
+    describe("series must have same length", () => {
+        const x = [1, 2, 3, 4];
+        const y = [[1, 2, 3], [1, 2, 3, 4, 5]];
+        const msg = "Invalid length for 'y', expected 4";
+        expect(() => new InterpolatorConstant(x, y)).toThrow(msg);
+        expect(() => new InterpolatorConstant(x, [y[0]])).toThrow(msg);
+        expect(() => new InterpolatorConstant(x, [y[1]])).toThrow(msg);
+    });
+});
