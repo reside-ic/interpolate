@@ -6,8 +6,8 @@ export abstract class InterpolatorBase {
     public readonly nY: number;
 
     protected _i: number;
-    protected _x: number[];
-    protected _y: number[];
+    protected readonly _x: readonly number[];
+    protected readonly _y: readonly number[][];
 
     /**
      * @param x The x (often time) variables that form the domain of
@@ -16,22 +16,23 @@ export abstract class InterpolatorBase {
      * @param y An array of variables to interpolate, the same length
      * as `x`, or a multiple of its length.
      */
-    constructor(x: number[], y: number[]) {
-        if (y.length === 0 || y.length % x.length !== 0) {
-            throw Error("'y.length' must be multiple of 'x.length'");
-        }
+    constructor(x: number[], y: number[][]) {
+        // TODO: cope with y as number[]
+        //
+        // TODO: clone deeply?, or provide recalculate method to work
+        // with splines
         this._i = 0;
-        this._x = x.slice();
-        this._y = y.slice();
+        this._x = x;
+        this._y = y;
         this.nX = this._x.length;
-        this.nY = this._y.length / this.nX;
+        this.nY = this._y[0].length;
     }
 
     /** Evaluate the interpolation function
      *
      * @param x The x position to interpolate the function at
      */
-    public abstract eval(x: number): number[];
+    public abstract eval(x: number, series: number): number;
 
     protected search(target: number, allowRight: boolean) {
         const i = interpolateSearch(target, this._x, this._i);
@@ -43,7 +44,8 @@ export abstract class InterpolatorBase {
     }
 }
 
-export function interpolateSearch(target: number, x: number[], prev: number) {
+export function interpolateSearch(target: number, x: readonly number[],
+                                  prev: number) {
     let i0 = prev;
     let i1 = prev;
     let inc = 1;
