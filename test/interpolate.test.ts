@@ -56,9 +56,18 @@ describe("Constant interpolation of a single trace", () => {
     // });
 });
 
+/* r code for the example:
+
+  x <- 0:6
+  y <- c(0.66, 0.905, 0.731, 0.638, 0.087, 0.382, 0.285)
+  z <- c(0.04, 1.57, 2.06, 2.87, 3.75, 4.55, 5.56)
+  dput(approx(x, y, z)$y)
+ */
 describe("Linear interpolation of a single trace", () => {
     const x = [0, 1, 2, 3, 4, 5, 6];
     const y = [0.66, 0.905, 0.731, 0.638, 0.087, 0.382, 0.285];
+    const z = [0.04, 1.57, 2.06, 2.87, 3.75, 4.55];
+    const expected = [0.6698, 0.80582, 0.72542, 0.65009, 0.22475, 0.24925];
     const obj = new InterpolatorLinear(x, [y]);
     it("returns change points correctly", () => {
         for (let i = 0; i < x.length; ++i) {
@@ -70,6 +79,12 @@ describe("Linear interpolation of a single trace", () => {
         for (let i = 0; i < x.length - 1; ++i) {
             expect(obj.eval(x[i] + 0.5)).toBeCloseTo(
                 (y[i] + y[i + 1]) / 2);
+        }
+    });
+
+    it("returns other points correctly", () => {
+        for (let i = 0; i < z.length; ++i) {
+            expect(obj.eval(z[i])).toBeCloseTo(expected[i]);
         }
     });
 
