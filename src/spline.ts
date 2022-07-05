@@ -85,7 +85,7 @@ function splineCalcK(A: number[][], B: number[][]) {
 }
 
 export function solve(n: number, a: number[], b: number[], c: number[],
-               x: number[]) {
+                      x: number[]) {
     if (!solveTridiagonal(n, a, b, c, x)) {
         throw Error("solve failed: singular matrix?");
     }
