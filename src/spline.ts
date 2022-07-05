@@ -3,7 +3,13 @@ import solveTridiagonal from "solve-tridiagonal";
 import {InterpolatorBase} from "./base";
 
 /**
- * Cubic spline interpolation
+ * Cubic spline interpolation, with "natural" boundary conditions (see
+ * docs for R's `?spline`). Compared with the other interpolation
+ * objects ({@link InterpolatorConstant} and {@link
+ * InterpolatorLinear}) here we have to do some set up after
+ * initialisation to prepare the coefficients of the system. The
+ * actual interpolation via {@link InterpolatorSpline.eval} is not
+ * much complex than linear interepolation though.
  */
 export class InterpolatorSpline extends InterpolatorBase {
     private _k: number[][];
@@ -11,7 +17,7 @@ export class InterpolatorSpline extends InterpolatorBase {
         super(x, y);
         const A = splineCalcA(this._x);
         const B = splineCalcB(this._x, this._y);
-        this._k = splineCalcK(A, B); // k actually the same as B
+        this._k = splineCalcK(A, B);
     }
 
     public eval(x: number, series: number = 0) {
@@ -35,19 +41,24 @@ function splineCalcA(x: readonly number[]) {
     const A0 = Array(n);
     const A1 = Array(n);
     const A2 = Array(n);
-    const nm1 = n - 1;
 
+    // Left boundary
     A0[0] = 0; // will be ignored
     A1[0] = 2 / (x[1] - x[0]);
     A2[0] = 1 / (x[1] - x[0]);
-    for (let i = 1; i < nm1; ++i) {
-        A0[i] = 1 / (x[i] - x[i - 1]);
-        A1[i] = 2 * (1 / (x[i] - x[i - 1]) + 1 / (x[i + 1] - x[i]));
-        A2[i] = 1 / (x[i + 1] - x[i]);
+    // Middle elements
+    for (let i = 1; i < n - 1; ++i) {
+        const x0 = x[i - 1];
+        const x1 = x[i];
+        const x2 = x[i + 1];
+        A0[i] = 1 / (x1 - x0);
+        A1[i] = 2 * (1 / (x1 - x0) + 1 / (x2 - x1));
+        A2[i] = 1 / (x2 - x1);
     }
-    A0[nm1] = 1 / (x[nm1] - x[nm1 - 1]);
-    A1[nm1] = 2 / (x[nm1] - x[nm1 - 1]);
-    A2[nm1] = 0; // will be ignored
+    // Right boundary
+    A0[n - 1] = 1 / (x[n - 1] - x[n - 2]);
+    A1[n - 1] = 2 / (x[n - 1] - x[n - 2]);
+    A2[n - 1] = 0; // will be ignored
 
     return [A0, A1, A2];
 }
@@ -60,14 +71,22 @@ function splineCalcB(x: readonly number[], y: readonly number[][]) {
     for (let j = 0; j < ny; ++j) {
         const bj = Array(n);
         const yj = y[j];
-        bj[0] = 3 * (yj[1] - yj[0]) / ((x[1] - x[0]) * (x[1] - x[0]));
+        // Left boundary
+        bj[0] = 3 * (yj[1] - yj[0]) / ((x[1] - x[0]) ** 2);
+        // Middle elements
         for (let i = 1; i < nm1; ++i) {
-            bj[i] = 3 *
-                ((yj[i]     - yj[i - 1]) / ((x[i    ] - x[i - 1]) * (x[i    ] - x[i - 1])) +
-                 (yj[i + 1] - yj[i    ]) / ((x[i + 1] - x[i    ]) * (x[i + 1] - x[i    ])));
+            const x0 = x[i - 1];
+            const x1 = x[i];
+            const x2 = x[i + 1];
+            const yj0 = yj[i - 1];
+            const yj1 = yj[i];
+            const yj2 = yj[i + 1];
+            bj[i] = 3 * ((yj1 - yj0) / ((x1 - x0) ** 2) +
+                         (yj2 - yj1) / ((x2 - x1) ** 2));
         }
-        bj[nm1] = 3 *
-            (yj[nm1] - yj[nm1 - 1]) / ((x[nm1] - x[nm1 - 1]) * (x[nm1] - x[nm1 - 1]));
+        // Right boundary
+        bj[nm1] = 3 * (yj[nm1] - yj[nm1 - 1]) / ((x[nm1] - x[nm1 - 1]) ** 2);
+
         B.push(bj);
     }
     return B;
@@ -84,6 +103,8 @@ function splineCalcK(A: number[][], B: number[][]) {
     return B;
 }
 
+// Exported just so that we can test that it throws as expected, not
+// exported from the package.
 export function solve(n: number, a: number[], b: number[], c: number[],
                       x: number[]) {
     if (!solveTridiagonal(n, a, b, c, x)) {
