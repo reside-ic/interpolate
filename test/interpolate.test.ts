@@ -1,7 +1,7 @@
 import {interpolateSearch} from "../src/base";
 import {InterpolatorConstant} from "../src/constant";
 import {InterpolatorLinear} from "../src/linear";
-import {solve, InterpolatorSpline} from "../src/spline";
+import {InterpolatorSpline, solve} from "../src/spline";
 
 // look in odin:tests/testthat/test-js-support-interpolate.R for test cases
 describe("interpolateSearch can find points", () => {
@@ -59,7 +59,7 @@ describe("Constant interpolation of a single trace", () => {
     it("returns change points correctly", () => {
         for (let i = 0; i < x.length; ++i) {
             expect(obj.eval(x[i])).toEqual(y[i]);
-        };
+        }
     });
 
     it("returns midpoints correctly", () => {
@@ -150,7 +150,6 @@ describe("Linear interpolation of multiple traces", () => {
     it("returns a vector of length 2", () => {
         const obj = new InterpolatorLinear(x, y);
         const z = obj.evalAll(1);
-        console.log(z);
         expect(z[0]).toBeCloseTo(y[0][1]);
         expect(z[1]).toBeCloseTo(y[1][1]);
     });
@@ -163,10 +162,10 @@ describe("throw on singular matrix", () => {
         //     [1 1 0]
         // A = [2 4 3]
         //     [0 2 3]
-        var a = [0, 2, 2]
-        var b = [1, 4, 3]
-        var c = [1, 3, 0]
-        var d = [5, 6, 7]
+        const a = [0, 2, 2];
+        const b = [1, 4, 3];
+        const c = [1, 3, 0];
+        const d = [5, 6, 7];
         expect(() => solve(3, a, b, c, d))
             .toThrow("solve failed: singular matrix?");
     });
