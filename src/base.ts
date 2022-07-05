@@ -13,18 +13,20 @@ export abstract class InterpolatorBase {
      * @param x The x (often time) variables that form the domain of
      * interpolation
      *
-     * @param y An array of variables to interpolate, the same length
-     * as `x`, or a multiple of its length.
+     * @param y An array of variables to interpolate, or an array of
+     * arrays, each of the same length as `x`
      */
-    constructor(x: number[], y: number[][]) {
-        // TODO: cope with y as number[]
+    constructor(x: number[], y: number[] | number[][]) {
+        if (!isArrayArray(y)) {
+            y = [y];
+        }
         this._i = 0;
         this._x = x;
         this._y = y;
         this.nX = this._x.length;
         this.nY = this._y.length;
         for (let i = 0; i < this.nY; ++i) {
-            if (y[i].length !== this.nX) {
+            if (this._y[i].length !== this.nX) {
                 throw Error(`Invalid length for 'y', expected ${this.nX}`);
             }
         }
@@ -110,4 +112,8 @@ export function interpolateSearch(target: number, x: readonly number[],
     }
 
     return i0;
+}
+
+function isArrayArray(x: number[] | number[][]): x is number[][] {
+    return Array.isArray(x[0]);
 }

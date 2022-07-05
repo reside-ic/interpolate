@@ -7,7 +7,7 @@ import {InterpolatorBase} from "./base";
  */
 export class InterpolatorSpline extends InterpolatorBase {
     private _k: number[][];
-    constructor(x: number[], y: number[][]) {
+    constructor(x: number[], y: number[] | number[][]) {
         super(x, y);
         const A = splineCalcA(this._x);
         const B = splineCalcB(this._x, this._y);

@@ -54,7 +54,7 @@ describe("Constant interpolation of a single trace", () => {
     const y = [0.66, 0.905, 0.731, 0.638, 0.087, 0.382, 0.285];
     const z = [0.04, 1.57, 2.06, 2.87, 3.75, 4.55, 5.56];
     const expected = [0.66, 0.905, 0.731, 0.731, 0.638, 0.087, 0.382];
-    const obj = new InterpolatorConstant(x, [y]);
+    const obj = new InterpolatorConstant(x, y);
 
     it("returns change points correctly", () => {
         for (let i = 0; i < x.length; ++i) {
@@ -87,7 +87,7 @@ describe("Linear interpolation of a single trace", () => {
     const y = [0.66, 0.905, 0.731, 0.638, 0.087, 0.382, 0.285];
     const z = [0.04, 1.57, 2.06, 2.87, 3.75, 4.55];
     const expected = [0.6698, 0.80582, 0.72542, 0.65009, 0.22475, 0.24925];
-    const obj = new InterpolatorLinear(x, [y]);
+    const obj = new InterpolatorLinear(x, y);
     it("returns change points correctly", () => {
         for (let i = 0; i < x.length; ++i) {
             expect(obj.eval(x[i])).toBeCloseTo(y[i]);
@@ -128,7 +128,7 @@ describe("Spline interpolation of a single trace", () => {
     const expected = [0.6750609536, 0.810456584980769, 0.726703650984615,
                       0.68261705105, 0.174318449519231, 0.205288526442308,
                       0.389962490092308];
-    const obj = new InterpolatorSpline(x, [y]);
+    const obj = new InterpolatorSpline(x, y);
     it("returns change points correctly", () => {
         for (let i = 0; i < x.length; ++i) {
             expect(obj.eval(x[i])).toBeCloseTo(y[i]);
@@ -141,7 +141,6 @@ describe("Spline interpolation of a single trace", () => {
         }
     });
 });
-
 
 describe("Linear interpolation of multiple traces", () => {
     const x = [0, 1, 2, 3, 4];
@@ -156,7 +155,6 @@ describe("Linear interpolation of multiple traces", () => {
         expect(z[1]).toBeCloseTo(y[1][1]);
     });
 });
-
 
 describe("throw on singular matrix", () => {
     it("throws", () => {
