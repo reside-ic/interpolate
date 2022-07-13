@@ -5,7 +5,7 @@ import {InterpolatorSpline, solve} from "../src/spline";
 
 // look in odin:tests/testthat/test-js-support-interpolate.R for test cases
 describe("interpolateSearch can find points", () => {
-    it("Can find point", () => {
+    it("Can find limit points, regardless of search start", () => {
         const x = [0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5];
         expect(interpolateSearch(0,  x, 0)).toEqual(-1);
         expect(interpolateSearch(10, x, 0)).toEqual(10);
@@ -64,13 +64,13 @@ describe("Constant interpolation of a single trace", () => {
 
     it("returns midpoints correctly", () => {
         for (let i = 0; i < x.length - 1; ++i) {
-            expect(obj.eval(x[i] + 0.5)).toBeCloseTo(y[i]);
+            expect(obj.eval(x[i] + 0.5)).toEqual(y[i]);
         }
     });
 
     it("returns other points correctly", () => {
         for (let i = 0; i < z.length; ++i) {
-            expect(obj.eval(z[i])).toBeCloseTo(expected[i]);
+            expect(obj.eval(z[i])).toEqual(expected[i]);
         }
     });
 });
