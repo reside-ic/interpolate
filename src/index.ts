@@ -1,10 +1,4 @@
-/**
- * Add two numbers
- *
- * @param a First number
- *
- * @param b Second number
- */
-export function add(a: number, b: number) {
-    return a + b;
-}
+export {InterpolatorBase} from "./base";
+export {InterpolatorConstant} from "./constant";
+export {InterpolatorLinear} from "./linear";
+export {InterpolatorSpline} from "./spline";
